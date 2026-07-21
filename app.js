@@ -1,5 +1,5 @@
 // Replace this after you create your reserved zrok name.
-const API_BASE_URL = "https://REPLACE-ME.share.zrok.io";
+const API_BASE_URL = "https://us0ris-qwen.shares.zrok.io";
 
 const keyPanel = document.querySelector("#key-panel");
 const chatPanel = document.querySelector("#chat-panel");
