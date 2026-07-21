@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <title>Felix Remote</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="mobile-scrim" class="mobile-scrim" hidden></div>
+
+  <aside id="sidebar" class="sidebar">
+    <header class="sidebar-brand">
+      <div class="brand-mark">F</div>
+      <div class="brand-copy">
+        <strong>Felix</strong>
+        <span>Remote workspace</span>
+      </div>
+      <button id="close-sidebar" class="icon-button mobile-only" aria-label="Close sidebar">×</button>
+    </header>
+
+    <button id="new-chat" class="new-chat-button" type="button"><span>＋</span> New chat</button>
+
+    <label class="search-field">
+      <span>⌕</span>
+      <input id="chat-search" type="search" placeholder="Search chats" autocomplete="off">
+    </label>
+
+    <div id="chat-history" class="chat-history scroll-area"></div>
+
+    <nav class="primary-nav" aria-label="Workspace pages">
+      <button class="nav-button active" data-page="conversation"><span>◫</span>Conversation</button>
+      <button class="nav-button" data-page="skills"><span>◇</span>Skills</button>
+      <button class="nav-button" data-page="details"><span>≡</span>Details</button>
+      <button class="nav-button" data-page="model"><span>⌘</span>Model</button>
+      <button class="nav-button" data-page="settings"><span>⚙</span>Settings</button>
+    </nav>
+
+    <footer class="sidebar-footer">
+      <button id="model-picker" class="model-picker" type="button">
+        <span class="model-copy"><small>Engine</small><strong id="selected-model-label">qwen3:32b</strong></span>
+        <span>⌄</span>
+      </button>
+      <div class="connection-line">
+        <span id="connection-dot" class="connection-dot"></span>
+        <span id="connection-text">Checking backend…</span>
+      </div>
+      <button id="change-api-key" class="text-button" type="button">Change API key</button>
+    </footer>
+  </aside>
+
+  <main id="main" class="main">
+    <header class="topbar">
+      <div class="topbar-title">
+        <button id="open-sidebar" class="icon-button" aria-label="Open sidebar">☰</button>
+        <div>
+          <h1 id="page-title">New chat</h1>
+          <p id="page-subtitle">Local model · private workspace</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="rename-chat" class="ghost-button conversation-action" type="button" hidden>Rename</button>
+        <button id="queue-button" class="ghost-button conversation-action" type="button">Queue <span id="queue-badge" class="badge" hidden>0</span></button>
+        <button id="artifact-button" class="ghost-button conversation-action" type="button" hidden>Artifacts <span id="artifact-badge" class="badge">0</span></button>
+      </div>
+    </header>
+
+    <section id="page-conversation" class="page page-conversation active">
+      <div id="conversation-scroll" class="conversation-scroll scroll-area">
+        <section id="empty-state" class="empty-state">
+          <p class="eyebrow">LOCAL REASONING WORKSPACE</p>
+          <h2 id="greeting">Good evening, Matt</h2>
+          <p class="empty-subtitle">What are you working on?</p>
+          <div id="suggestions" class="suggestions"></div>
+        </section>
+        <section id="message-list" class="message-list" aria-live="polite" hidden></section>
+      </div>
+
+      <form id="composer" class="composer" autocomplete="off">
+        <div id="attachment-tray" class="attachment-tray" hidden></div>
+        <textarea id="prompt" rows="1" placeholder="How can I help you today?" aria-label="Message Felix"></textarea>
+        <div class="composer-footer">
+          <div class="composer-controls">
+            <button id="file-control" class="composer-control" type="button">＋ File</button>
+            <button id="target-control" class="composer-control" type="button">Target: None ▾</button>
+            <button id="effort-control" class="composer-control" type="button">Extra ▾</button>
+            <button id="web-control" class="composer-control" type="button">Web: Auto ▾</button>
+          </div>
+          <div class="composer-submit">
+            <span id="composer-status" class="composer-status"></span>
+            <button id="stop-button" class="stop-button" type="button" hidden>Stop</button>
+            <button id="send-button" class="send-button" type="submit">↑</button>
+          </div>
+        </div>
+      </form>
+      <input id="file-input" type="file" multiple hidden>
+    </section>
+
+    <section id="page-skills" class="page page-grid">
+      <aside class="section-list-panel">
+        <div class="section-heading-row"><div><h2>Skills</h2><p>Reusable local instructions</p></div><button id="new-skill" class="small-button">＋ New</button></div>
+        <div id="skills-list" class="section-list scroll-area"></div>
+      </aside>
+      <article class="editor-panel scroll-area">
+        <div class="editor-heading"><div><h2>Skill editor</h2><p>Enabled skills shape every Felix request.</p></div><label class="toggle-label"><input id="skill-enabled" type="checkbox"><span>Enabled</span></label></div>
+        <label>Name<input id="skill-name" type="text" maxlength="100"></label>
+        <label>Description<textarea id="skill-description" rows="3"></textarea></label>
+        <label>Instructions<textarea id="skill-instructions" class="tall-textarea" rows="14"></textarea></label>
+        <p id="skill-status" class="form-status">Select or create a skill.</p>
+        <div class="form-actions"><button id="delete-skill" class="danger-button">Delete</button><button id="save-skill" class="primary-button">Save skill</button></div>
+      </article>
+    </section>
+
+    <section id="page-details" class="page details-page scroll-area">
+      <div class="details-header"><div><h2>Run details</h2><p>Detailed Medium, Extra, sustained-work, and web-research runs appear here.</p></div><button id="refresh-details" class="small-button">Refresh</button></div>
+      <div id="run-summary" class="stats-grid"></div>
+      <div class="detail-card"><h3>Current stage</h3><div id="active-run-details" class="detail-content muted">No run is active.</div></div>
+      <div class="detail-card"><h3>Most recent transcript</h3><pre id="run-transcript" class="transcript">No completed run in this chat.</pre></div>
+      <div class="detail-card"><div class="detail-card-title"><h3>Work logs</h3><button id="refresh-logs" class="text-button">Refresh</button></div><div id="logs-list" class="logs-list"></div><pre id="log-content" class="transcript" hidden></pre></div>
+    </section>
+
+    <section id="page-model" class="page model-page scroll-area">
+      <div class="page-intro"><h2>Felix model editor</h2><p>Edit the system prompt and raw Ollama Modelfile, then build a separate local engine.</p></div>
+      <div class="model-toolbar">
+        <button id="load-model" class="primary-button">Load selected engine</button>
+        <button id="reload-model" class="ghost-button">Reload</button>
+        <button id="reset-model" class="ghost-button">Reset editor</button>
+        <span id="model-editor-status" class="form-status">Select an engine, then load its definition.</span>
+      </div>
+      <div class="two-column-fields">
+        <label>Source engine<input id="model-source" type="text" readonly></label>
+        <label>New engine name<input id="model-name" type="text" value="felix-custom:latest"></label>
+      </div>
+      <label>System prompt<textarea id="system-prompt" rows="8" placeholder="Use Skills for modular behavior. Use this field for persistent base behavior."></textarea></label>
+      <div class="inline-actions"><button id="apply-system-prompt" class="small-button">Apply to Modelfile</button></div>
+      <label>Raw Modelfile<textarea id="modelfile" class="code-editor" rows="22" spellcheck="false"># Load the selected engine to edit its Ollama Modelfile.</textarea></label>
+      <div class="model-actions">
+        <label class="file-button">Import Modelfile<input id="modelfile-import" type="file" hidden></label>
+        <button id="download-modelfile" class="ghost-button">Download copy</button>
+        <button id="save-host-modelfile" class="ghost-button">Save on host</button>
+        <button id="build-model" class="primary-button">Build engine</button>
+      </div>
+    </section>
+
+    <section id="page-settings" class="page settings-page scroll-area">
+      <div class="page-intro"><h2>Settings</h2><p>Personalize Felix, configure local inference, web research, and reasoning budgets.</p></div>
+
+      <section class="settings-section"><h3>Personalization</h3>
+        <div class="two-column-fields"><label>Name in the greeting<input id="setting-display-name" type="text"></label><label>What Felix should call you<input id="setting-user-address" type="text"></label></div>
+        <label>Greeting template<input id="setting-greeting-template" type="text"><small>Use {time} and {name}.</small></label>
+        <label>Prompt placeholder<input id="setting-placeholder" type="text"></label>
+        <label class="toggle-row"><input id="setting-suggestions" type="checkbox"><span><strong>Show suggested prompts</strong><small>Display three starter ideas on a new chat.</small></span></label>
+      </section>
+
+      <section class="settings-section"><h3>Ollama</h3>
+        <div class="two-column-fields"><label>Server URL<input id="setting-ollama-url" type="url"></label><label>Selected model<input id="setting-model" type="text" readonly></label></div>
+      </section>
+
+      <section class="settings-section"><h3>Web research</h3><p>Give Felix current Google search results through Serper while the reasoning model remains local.</p>
+        <div class="secret-row"><label>Serper API key<input id="serper-key" type="password" autocomplete="off"></label><div><span id="serper-status" class="status-pill">No key stored</span></div></div>
+        <div class="inline-actions"><button id="save-serper" class="small-button">Save key</button><button id="test-serper" class="ghost-button">Test</button><button id="clear-serper" class="danger-button">Clear</button></div>
+        <div class="segmented" id="setting-web-mode"><button data-value="Off">Off</button><button data-value="Automatic">Automatic</button><button data-value="Always">Always</button></div>
+        <p id="web-mode-description" class="muted"></p>
+        <div class="four-column-fields"><label>Country code<input id="setting-web-country" type="text"></label><label>Language code<input id="setting-web-language" type="text"></label><label>Maximum searches<input id="setting-web-searches" type="number" min="1" max="10"></label><label>Pages to read<input id="setting-web-pages" type="number" min="0" max="8"></label></div>
+        <label class="toggle-row"><input id="setting-web-read" type="checkbox"><span><strong>Read selected result pages</strong><small>Fetch readable HTML and text-based PDFs after search.</small></span></label>
+        <p class="privacy-note">The Serper key is encrypted on the home PC. Search queries leave the computer; chats, uploaded files, and local inference remain local unless their text is deliberately included in a query.</p>
+      </section>
+
+      <section class="settings-section"><h3>Reasoning budgets</h3>
+        <div class="four-column-fields"><label>Context tokens<input id="setting-context" type="number"></label><label>Tokens per perspective<input id="setting-solver" type="number"></label><label>Critic tokens<input id="setting-critic" type="number"></label><label>Final-answer tokens<input id="setting-final" type="number"></label></div>
+      </section>
+
+      <section class="settings-section"><h3>Sustained work</h3><p>Felix runs analysis and verification cycles until the target is reached, unless the independent early-finish gate passes.</p>
+        <div class="two-column-fields"><label>Default work target<input id="setting-target" type="text" placeholder="0, 30m, 2h"></label><label>Independent approvals required<input id="setting-verification" type="number" min="2" max="8"></label></div>
+      </section>
+
+      <section class="settings-section"><h3>Conversation and artifacts</h3>
+        <label class="toggle-row"><input id="setting-history" type="checkbox"><span><strong>Include recent conversation history</strong><small>Use recent messages as context.</small></span></label>
+        <label class="toggle-row"><input id="setting-artifacts" type="checkbox"><span><strong>Create artifacts automatically</strong><small>Promote substantial standalone content.</small></span></label>
+        <label class="toggle-row"><input id="setting-preview" type="checkbox"><span><strong>Auto-preview compatible artifacts</strong><small>Render HTML, SVG, and Markdown locally.</small></span></label>
+      </section>
+
+      <section class="settings-section"><h3>Persistent system prompt</h3><textarea id="setting-system-prompt" rows="8"></textarea></section>
+      <div class="settings-actions"><button id="open-data-folder" class="ghost-button">Open data folder on host</button><button id="download-backup" class="ghost-button">Download backup</button><button id="save-settings" class="primary-button">Save settings</button></div>
+    </section>
+  </main>
+
+  <aside id="artifact-pane" class="artifact-pane" hidden>
+    <header><div><h2>Artifacts</h2><p id="artifact-count">0 items</p></div><button id="close-artifacts" class="icon-button">×</button></header>
+    <div id="artifact-list" class="artifact-list scroll-area"></div>
+    <div class="artifact-workspace">
+      <div class="artifact-header"><div><h3 id="artifact-title">Select an artifact</h3><p id="artifact-meta"></p></div><div class="segmented compact"><button id="artifact-preview-mode" class="active">Preview</button><button id="artifact-source-mode">Source</button></div></div>
+      <div id="artifact-empty" class="artifact-empty">Select an artifact from the list.</div>
+      <iframe id="artifact-preview" sandbox="allow-scripts" hidden></iframe>
+      <pre id="artifact-source" class="artifact-source" hidden></pre>
+      <footer><button id="copy-artifact" class="ghost-button" disabled>Copy</button><button id="download-artifact" class="ghost-button" disabled>Download</button><button id="open-artifact" class="primary-button" disabled>Open preview</button></footer>
+    </div>
+  </aside>
+
+  <aside id="queue-drawer" class="queue-drawer" hidden>
+    <header><div><h2>Message queue</h2><p>Oldest first across chats</p></div><button id="close-queue" class="icon-button">×</button></header>
+    <div id="queue-list" class="queue-list scroll-area"></div>
+    <footer><button id="clear-queue" class="danger-button">Clear this chat</button><button id="run-next" class="primary-button">Run next</button></footer>
+  </aside>
+
+  <div id="popover" class="popover" hidden></div>
+
+  <div id="modal-backdrop" class="modal-backdrop" hidden>
+    <form id="modal" class="modal-card">
+      <header><h2 id="modal-title">Dialog</h2><button id="modal-close" class="icon-button" type="button">×</button></header>
+      <p id="modal-message"></p>
+      <input id="modal-input" type="text" hidden>
+      <textarea id="modal-textarea" rows="7" hidden></textarea>
+      <footer><button id="modal-secondary" class="ghost-button" type="button">Cancel</button><button id="modal-primary" class="primary-button" type="submit">OK</button></footer>
+    </form>
+  </div>
+
+  <div id="connect-backdrop" class="connect-backdrop">
+    <form id="connect-form" class="connect-card">
+      <p class="eyebrow">PRIVATE CONNECTION</p>
+      <h2>Connect to Felix.</h2>
+      <p>Enter the API key stored in <code>C:\RemoteQwen\.env</code>. It remains in this browser session only.</p>
+      <label>API key<input id="api-key" type="password" autocomplete="off" spellcheck="false" required></label>
+      <button class="primary-button" type="submit">Connect</button>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" hidden><span id="toast-message"></span><button id="toast-action" class="text-button" hidden></button></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
