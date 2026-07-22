@@ -1,4 +1,4 @@
-const CACHE_NAME = "felix-remote-493-multiclient-v3";
+const CACHE_NAME = "felix-remote-493-connect-null-fix-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
