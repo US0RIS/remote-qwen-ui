@@ -678,8 +678,14 @@ function renderChatHistory() {
 function renderConversationHeader() {
   const chat = state.currentChat;
   dom.pageTitle.textContent = chat?.title || "New chat";
-  const activeHere = state.activeRun?.chat_id === chat?.id;
-  dom.pageSubtitle.textContent = activeHere ? `${state.activeRun.stage || "Working"} · ${formatElapsed(state.activeRun.elapsed_seconds)}` : "Local model · private workspace";
+  const activeHere = Boolean(
+    state.activeRun &&
+    chat &&
+    state.activeRun.chat_id === chat.id
+  );
+  dom.pageSubtitle.textContent = activeHere
+    ? `${state.activeRun.stage || "Working"} · ${formatElapsed(state.activeRun.elapsed_seconds)}`
+    : "Local model · private workspace";
   dom.renameChat.hidden = !(chat && (chat.messages || []).length);
   const queueCount = (chat?.queue || []).length;
   dom.queueBadge.hidden = !queueCount;
@@ -702,7 +708,9 @@ function renderConversation() {
     ...messages.map(createMessageElement),
     ...queue.map(createQueuedMessageElement),
   );
-  if (state.activeRun?.chat_id === chat.id) dom.messageList.prepend(createRunStatusCard());
+  if (state.activeRun && chat && state.activeRun.chat_id === chat.id) {
+    dom.messageList.prepend(createRunStatusCard());
+  }
   decorateMarkdown(dom.messageList);
 }
 
@@ -828,7 +836,11 @@ function renderComposer() {
     return chip;
   }));
   const busy = Boolean(state.activeRun);
-  const busyHere = state.activeRun?.chat_id === state.currentChat?.id;
+  const busyHere = Boolean(
+    state.activeRun &&
+    state.currentChat &&
+    state.activeRun.chat_id === state.currentChat.id
+  );
   dom.stopButton.hidden = !busy;
   dom.sendButton.disabled = state.submitInFlight;
   dom.sendButton.textContent = state.submitInFlight ? "…" : busy ? "+" : "↑";
